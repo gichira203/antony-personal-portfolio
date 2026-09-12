@@ -8,7 +8,7 @@ export function Footer() {
         <div className="footer-top">
           <div className="footer-brand">
             <div className="footer-logo-wrap">
-              <Image src="/images/logo.jpg" alt="antoh logo" width={54} height={54} className="footer-logo" />
+              <Image src="/images/logo.png" alt="antoh logo" width={54} height={54} className="footer-logo" />
             </div>
             <h3>antoh</h3>
             <p>Software Developer | Computer Science</p>

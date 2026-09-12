@@ -195,15 +195,15 @@ section {
 }
 
 .brand-logo-wrap {
-  width: 42px;
-  height: 42px;
+  width: 62px;
+  height: 62px;
   border-radius: 50%;
   overflow: hidden;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, var(--accent-color), #f7b689);
-  box-shadow: 0 8px 20px rgba(232, 117, 50, 0.25);
+  background: #fafafa;
+  box-shadow: none;
 }
 
 .brand-logo {
@@ -311,85 +311,117 @@ section {
 }
 
 .hero {
-  min-height: 520px;
+  min-height: 500px;
   padding: 0;
   position: relative;
-  overflow: hidden;
+  background-color: #fafafa;
 }
 
-.hero .content {
-  position: relative;
-  min-height: 520px;
+.hero .hero-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  width: 100%;
+  max-width: none;
+  min-height: 500px;
+  padding: 0;
+  background-color: #fafafa;
+}
+
+.hero .hero-content {
+  display: flex;
+  align-items: flex-start;
+  padding: 2.5rem clamp(2rem, 4vw, 4rem);
+  background-color: #fafafa;
 }
 
 .hero .hero-text-card {
-  max-width: 650px;
-  padding: 1.5rem clamp(1.5rem, 4vw, 4rem) 2.5rem;
-  background: var(--surface-color);
+  max-width: 600px;
 }
 
-.hero .hero-video-card {
-  height: 520px;
-  overflow: hidden;
+.hero .hero-image-card {
+  position: relative;
+  min-width: 0;
+  background-color: #fafafa;
 }
 
-@media (min-width: 992px) {
-  .hero .container {
-    width: 100%;
-    max-width: none;
-    padding-inline: 0;
-  }
-
-  .hero .row {
-    margin-inline: 0;
-  }
-
-  .hero .col-lg-6 {
-    flex: 0 0 50%;
-    width: 50%;
-    padding-inline: 0;
-  }
-
-  .hero .hero-video-card {
-    margin: 0;
-  }
-
-  .hero .col-lg-6:last-child {
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-  }
-}
-
-.hero .hero-video {
+.hero .hero-media-image {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: left center;
 }
 
-.hero .content h2 {
-  font-size: 3.5rem;
+.hero .hero-name {
+  font-size: clamp(2.8rem, 5vw, 4.5rem);
   font-weight: 700;
-  line-height: 1.2;
-  margin-bottom: 1.5rem;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.5rem;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  margin: 0;
+  color: var(--heading-color);
 }
 
-.hero-name-subtitle {
-  font-size: 1.25rem;
-  font-weight: 500;
+.hero .hero-role {
+  margin: 0.9rem 0 1.75rem;
   color: var(--accent-color);
   font-family: var(--nav-font);
+  font-size: clamp(0.82rem, 2.2vw, 1.65rem);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  min-height: 2.5rem;
+  white-space: nowrap;
 }
 
-.hero .content .lead {
+.hero .hero-career {
+  display: inline-block;
+  color: var(--accent-color);
+  background: transparent;
+  box-shadow: 0 0.35rem 0.9rem rgba(232, 117, 50, 0.18);
+  font-family: "Cascadia Code", "Fira Code", Consolas, monospace;
+  font-size: 1.05em;
+  letter-spacing: -0.03em;
+  text-decoration: underline;
+  text-decoration-color: rgba(232, 117, 50, 0.52);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.2rem;
+  text-shadow: 0 0 12px rgba(232, 117, 50, 0.35);
+  transition: opacity 0.45s ease, filter 0.45s ease, transform 0.45s ease;
+}
+
+.hero .hero-career::after {
+  content: "|";
+  margin-left: 0.12em;
+  color: var(--accent-color);
+  animation: hero-typing-cursor 0.75s steps(1, end) infinite;
+}
+
+.hero .hero-career.is-exiting {
+  opacity: 0;
+  filter: blur(7px);
+  transform: translateY(-0.35rem) scale(1.04);
+}
+
+@keyframes hero-typing-cursor {
+  50% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero .hero-career {
+    transition: none;
+  }
+
+  .hero .hero-career::after {
+    animation: none;
+  }
+}
+
+.hero .hero-content .lead {
   font-size: 1.25rem;
   margin-bottom: 2rem;
   color: color-mix(in srgb, var(--default-color), transparent 20%);
+  max-width: 680px;
 }
 
 .hero .cta-buttons {
@@ -422,7 +454,7 @@ section {
 }
 
 .hero .cta-buttons .btn.btn-outline {
-  border: 2px solid color-mix(in srgb, var(--accent-color), transparent 70%);
+  border: 1px solid color-mix(in srgb, var(--accent-color), transparent 55%);
   color: var(--accent-color);
   background: transparent;
 }
@@ -437,6 +469,7 @@ section {
   display: flex;
   gap: 2rem;
   margin-top: 1.5rem;
+  padding-top: 0;
 }
 
 .hero .hero-stats .stat-item .stat-number {
@@ -577,31 +610,47 @@ section {
 
 .about .about-image {
   position: relative;
+  float: left;
+  margin-right: 1.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .about .about-image img {
   box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
   width: 100%;
+  max-width: 380px;
   height: auto;
+  display: block;
 }
 
-.about .about-content {
-  padding-left: 2rem;
+.about .about-content .about-text {
+  max-width: 100%;
 }
 
-.about .about-content .subtitle {
-  font-size: 0.875rem;
-  font-weight: 600;
+.about .about-subtitle .subtitle {
+  font-size: 1.6rem;
+  font-weight: 700;
   letter-spacing: 2px;
   color: var(--accent-color);
   margin-bottom: 1rem;
   display: block;
+  text-align: center;
+  text-decoration: underline;
+  text-decoration-color: var(--accent-color);
+  text-underline-offset: 6px;
+  text-decoration-thickness: 2px;
+}
+
+.about .about-subtitle {
+  text-align: center;
+  margin-bottom: 1.5rem;
 }
 
 .about .about-content h2 {
   font-size: 2rem;
   font-weight: 700;
   margin-bottom: 1.5rem;
+  text-align: left;
 }
 
 .about .about-content .lead {
@@ -609,34 +658,64 @@ section {
   color: color-mix(in srgb, var(--default-color), transparent 25%);
 }
 
-.about .personal-info {
+.about .personal-info-cards {
   margin-top: 2rem;
-  padding: 2rem;
+  padding: 1.75rem;
   background-color: var(--surface-color);
+  border: 1px solid rgba(15, 41, 67, 0.08);
   border-radius: 1rem;
   box-shadow: 0 0 30px rgba(0, 0, 0, 0.05);
 }
 
-.about .personal-info .info-item {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+.about .personal-info-cards__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
 }
 
-.about .personal-info .info-item .label {
-  font-size: 0.875rem;
-  color: color-mix(in srgb, var(--default-color), transparent 40%);
+.about .personal-info-cards__card {
+  background: rgba(15, 41, 67, 0.03);
+  border: 1px solid rgba(15, 41, 67, 0.06);
+  border-radius: 0.75rem;
+  padding: 1rem 1.1rem;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 }
 
-.about .personal-info .info-item .value {
+.about .personal-info-cards__card:hover {
+  background: rgba(232, 117, 50, 0.05);
+  border-color: rgba(232, 117, 50, 0.25);
+  transform: translateY(-1px);
+}
+
+.about .personal-info-cards__label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--default-color), transparent 50%);
+  margin-bottom: 0.35rem;
+}
+
+.about .personal-info-cards__value {
+  display: block;
   font-weight: 600;
   color: var(--heading-color);
+  font-size: 0.98rem;
+  line-height: 1.4;
 }
 
-.about .signature {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
+.about .personal-info-cards__value a {
+  color: var(--accent-color);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.about .personal-info-cards__value a:hover {
+  color: color-mix(in srgb, var(--accent-color), transparent 20%);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .about .signature .signature-image {
@@ -1322,8 +1401,8 @@ section {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, var(--accent-color), #f7b689);
-  box-shadow: 0 10px 24px rgba(232, 117, 50, 0.2);
+  background: #fafafa;
+  box-shadow: none;
 }
 
 .footer-logo {
@@ -1549,45 +1628,21 @@ section {
   }
 
   .hero {
-    text-align: center;
     min-height: auto;
     padding: 0;
   }
 
-  .hero .container {
-    width: min(100%, 1200px);
-    padding-inline: 15px;
-  }
-
-  .hero .row {
-    margin-inline: -15px;
-  }
-
-  .hero .cta-buttons {
-    justify-content: center;
-  }
-
-  .hero .hero-stats {
-    justify-content: center;
-  }
-
-  .hero .content {
+  .hero .hero-layout {
+    grid-template-columns: 1fr;
     min-height: auto;
   }
 
-  .hero .hero-video-card,
-  .hero .hero-video {
-    height: 360px;
+  .hero .hero-image-card {
     min-height: 360px;
   }
 
   .hero .hero-text-card {
     max-width: none;
-    padding: 2rem 1.25rem 2.5rem;
-  }
-
-  .hero .hero-image {
-    margin-top: 3rem;
   }
 
   .about .about-content {
@@ -1628,14 +1683,24 @@ section {
     font-size: 32px;
   }
 
-  .hero .content h2 {
+  .hero .hero-name {
     font-size: 2.5rem;
   }
 
-  .hero .hero-video-card,
-  .hero .hero-video {
-    height: 280px;
-    min-height: 280px;
+  .hero {
+    padding: 0;
+  }
+
+  .hero .hero-image-card {
+    min-height: 300px;
+  }
+
+  .hero .hero-content {
+    padding: 2rem;
+  }
+
+  .hero .hero-content .lead {
+    font-size: 1.1rem;
   }
 
   .portfolio .portfolio-filters li {
@@ -1668,8 +1733,15 @@ section {
   }
 
   .hero .hero-stats {
-    flex-direction: column;
-    gap: 1.5rem;
+    gap: 1.25rem;
+  }
+
+  .hero .hero-content {
+    padding: 1.75rem 1.5rem;
+  }
+
+  .hero .hero-stats .stat-item .stat-number {
+    font-size: 2rem;
   }
 
   .testimonials .testimonial-item {

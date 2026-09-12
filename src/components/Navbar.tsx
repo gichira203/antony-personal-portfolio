@@ -13,7 +13,7 @@ export function Navbar() {
       <div className="header-container container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
         <Link href="#home" className="logo d-flex align-items-center me-auto me-xl-0" onClick={() => setMobileOpen(false)}>
           <div className="brand-logo-wrap" aria-label="antoh logo">
-            <Image src="/images/logo.jpg" alt="antoh logo" width={44} height={44} className="brand-logo" priority />
+            <Image src="/images/logo.png" alt="antoh logo" width={62} height={62} className="brand-logo" priority />
           </div>
           <h1 className="sitename brand-name">antoh</h1>
         </Link>

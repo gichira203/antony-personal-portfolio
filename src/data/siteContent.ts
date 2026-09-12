@@ -14,6 +14,8 @@ export const heroStats = [
   { value: "Django", label: "Backend" },
 ];
 
+export const githubUrl = "https://github.com/gichira203";
+
 export const personalInfo = [
   { label: "Name", value: "antoh" },
   { label: "Course/Field", value: "Computer Science" },
@@ -22,7 +24,14 @@ export const personalInfo = [
   { label: "Email", value: "antonygichira203@gmail.com" },
 ];
 
-export const githubUrl = "https://github.com/gichira203";
+export const personalCards = [
+  { label: "Name", value: "Antony Muthii", href: undefined },
+  { label: "Phone", value: "+254 726 815 333", href: "tel:+254726815333" },
+  { label: "Course / Field", value: "Computer Science", href: undefined },
+  { label: "Email", value: "antonygichira203@gmail.com", href: "mailto:antonygichira203@gmail.com" },
+  { label: "Profession", value: "Software Developer", href: undefined },
+  { label: "GitHub", value: "View Profile", href: githubUrl },
+];
 
 export const skillGroups = [
   {

@@ -25,9 +25,9 @@ export const metadata: Metadata = {
   title: "antoh | Software Developer",
   description: "Personal portfolio for antoh, a software developer focused on React, Next.js, Django, UI/UX and ICT technical support.",
   icons: {
-    icon: "/images/favicon.jpg",
-    shortcut: "/images/favicon.jpg",
-    apple: "/images/favicon.jpg",
+    icon: "/images/logo.png",
+    shortcut: "/images/logo.png",
+    apple: "/images/logo.png",
   },
   openGraph: {
     title: "antoh | Software Developer",
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     siteName: "antoh",
     images: [
       {
-        url: "/images/logo.jpg",
+        url: "/images/logo.png",
         width: 1200,
         height: 630,
         alt: "antoh portfolio",
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "antoh | Software Developer",
     description: "Personal portfolio for antoh, a software developer focused on React, Next.js, Django, UI/UX and ICT technical support.",
-    images: ["/images/logo.jpg"],
+    images: ["/images/logo.png"],
   },
 };
 
