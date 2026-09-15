@@ -1,5 +1,40 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Image from "next/image";
-import { projects } from "@/data/siteContent";
+
+interface PublicProject {
+  title: string;
+  category: string;
+  description: string;
+  technologies: string[];
+  image: string;
+  filter: string;
+  github: string;
+  demo: string;
+}
+
+async function fetchProjectsFromDb(): Promise<PublicProject[]> {
+  try {
+    const res = await fetch("http://localhost:3001/api/projects");
+    if (!res.ok) throw new Error("fetch failed");
+    const data = await res.json() as any[];
+    if (!Array.isArray(data) || data.length === 0) throw new Error("empty");
+    return data.map((p: any) => ({
+      title: p.title || "",
+      category: p.category || "",
+      description: p.description || "",
+      technologies: Array.isArray(p.technologies) ? p.technologies : [],
+      image: Array.isArray(p.images) && p.images.length > 0 ? p.images[0] : "/images/portfolio-1.webp",
+      filter: "filter-web",
+      github: p.github || "",
+      demo: p.demo || "#",
+    }));
+  } catch {
+    // Fall back to in-memory defaults only when DB is unreachable.
+    return (await import("@/data/siteContent")).projects as unknown as PublicProject[];
+  }
+}
 
 const filters = [
   { label: "All Work", value: "*", active: true },
@@ -10,6 +45,12 @@ const filters = [
 ];
 
 export function Portfolio() {
+  const [projects, setProjects] = useState<PublicProject[]>([]);
+
+  useEffect(() => {
+    fetchProjectsFromDb().then(setProjects);
+  }, []);
+
   return (
     <section id="portfolio" className="portfolio section">
       <div className="container section-title" data-aos="fade-up">

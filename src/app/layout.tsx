@@ -22,6 +22,7 @@ const questrial = Questrial({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://example.com"),
   title: "antoh | Software Developer",
   description: "Personal portfolio for antoh, a software developer focused on React, Next.js, Django, UI/UX and ICT technical support.",
   icons: {
@@ -57,7 +58,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${roboto.variable} ${notoSans.variable} ${questrial.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+      {children}
+      </body>
     </html>
   );
 }

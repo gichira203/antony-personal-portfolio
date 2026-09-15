@@ -25,6 +25,8 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
+  overflow-y: scroll;
 }
 
 body {
@@ -32,6 +34,7 @@ body {
   background-color: var(--background-color);
   font-family: var(--default-font);
   margin: 0;
+  overflow-x: hidden;
 }
 
 a {
@@ -77,7 +80,8 @@ section {
   background-color: var(--background-color);
   padding: 60px 0;
   scroll-margin-top: 90px;
-  overflow: clip;
+  overflow-x: hidden;
+  max-width: 100%;
 }
 
 .light-background {
@@ -90,6 +94,7 @@ section {
   width: min(100%, 1200px);
   margin-inline: auto;
   padding-inline: 15px;
+  overflow: hidden;
 }
 
 .container-xl {
@@ -133,7 +138,7 @@ section {
 .row {
   display: flex;
   flex-wrap: wrap;
-  margin-inline: -15px;
+  margin-inline: 0;
 }
 
 .col-6,
@@ -153,10 +158,17 @@ section {
 .col-12 { flex: 0 0 100%; }
 .col-sm-4,
 .col-md-4 { flex: 0 0 100%; }
-.col-md-6 { flex: 0 0 50%; }
+.col-12 { flex: 0 0 100%; }
+
+.col-sm-6 { flex: 0 0 100%; }
+.col-lg-4,
+.col-lg-6,
+.col-lg-8,
+.col-lg-10 { flex: 0 0 100%; }
 
 @media (min-width: 576px) {
   .col-sm-4 { flex: 0 0 calc(33.333333% - 1rem); }
+  .col-sm-6 { flex: 0 0 50%; }
 }
 
 @media (min-width: 768px) {
@@ -178,6 +190,8 @@ section {
   z-index: 997;
   position: sticky;
   top: 0;
+  width: 100%;
+  max-width: 100%;
 }
 
 .header .header-container {
@@ -185,6 +199,8 @@ section {
   border-radius: 50px;
   padding: 5px 25px;
   box-shadow: 0px 2px 15px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 100%;
 }
 
 .header .logo {
@@ -272,8 +288,20 @@ section {
   align-items: center;
   justify-content: space-between;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
   transition: color 0.3s ease, transform 0.3s ease;
   position: relative;
+}
+
+@media (max-width: 991px) {
+  .navmenu a,
+  .navmenu a:focus {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+  }
 }
 
 .navmenu a::after {
@@ -321,10 +349,11 @@ section {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   width: 100%;
-  max-width: none;
+  max-width: 100%;
   min-height: 500px;
   padding: 0;
   background-color: #fafafa;
+  overflow: hidden;
 }
 
 .hero .hero-content {
@@ -497,13 +526,37 @@ section {
 .hero-proof-list {
   display: flex;
   justify-content: center;
-  gap: clamp(3rem, 12vw, 10rem);
+  flex-wrap: wrap;
+  gap: clamp(1.5rem, 4vw, 3rem);
   margin: 0;
 }
 
 .hero-proof-item {
-  min-width: 180px;
+  min-width: 120px;
+  flex: 1 1 100px;
   text-align: center;
+}
+
+@media (max-width: 768px) {
+  .hero-proof-item {
+    min-width: 100px;
+    flex: 1 1 80px;
+  }
+}
+
+@media (max-width: 576px) {
+  .hero-proof-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem 1rem;
+  }
+  .hero-proof-item {
+    min-width: 0;
+    flex: unset;
+  }
+  .hero-proof-item dd {
+    font-size: 0.75rem;
+  }
 }
 
 .hero-proof-item dt {
@@ -541,11 +594,14 @@ section {
   position: absolute;
   border-radius: 30% 70% 70% 30%/30% 30% 70% 70%;
   z-index: 1;
+  max-width: 100%;
+  overflow: hidden;
+  pointer-events: none;
 }
 
 .hero .hero-image .shape-1 {
-  width: 300px;
-  height: 300px;
+  width: min(300px, 60vw);
+  height: min(300px, 60vw);
   background-color: color-mix(in srgb, var(--accent-color), transparent 85%);
   top: -20px;
   right: -20px;
@@ -553,8 +609,8 @@ section {
 }
 
 .hero .hero-image .shape-2 {
-  width: 200px;
-  height: 200px;
+  width: min(200px, 40vw);
+  height: min(200px, 40vw);
   background-color: color-mix(in srgb, var(--heading-color), transparent 90%);
   bottom: -20px;
   left: -20px;
@@ -613,14 +669,35 @@ section {
   float: left;
   margin-right: 1.5rem;
   margin-bottom: 1.5rem;
+  max-width: 380px;
+  width: auto;
+  max-width: 100%;
 }
 
 .about .about-image img {
   box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
   width: 100%;
-  max-width: 380px;
   height: auto;
   display: block;
+  max-width: 100%;
+}
+
+@media (max-width: 991px) {
+  .about .about-image {
+    float: none;
+    margin-right: 0;
+    margin-bottom: 2rem;
+    max-width: 280px;
+  }
+  .about .about-image img {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 576px) {
+  .about .about-image {
+    max-width: 200px;
+  }
 }
 
 .about .about-content .about-text {
@@ -815,6 +892,8 @@ section {
   height: 100%;
   width: 2px;
   background-color: color-mix(in srgb, var(--accent-color), transparent 85%);
+  overflow: hidden;
+  max-width: 100%;
 }
 
 .resume .resume-wrapper .timeline .timeline-item {
@@ -854,7 +933,20 @@ section {
 .resume .resume-wrapper .timeline .timeline-item .timeline-right {
   width: 70%;
   padding-left: 3rem;
-  margin-top: -4px;
+  min-width: 0;
+}
+
+@media (max-width: 991px) {
+  .resume .resume-wrapper .timeline .timeline-item .timeline-right {
+    width: 100%;
+    padding-left: 2.5rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .resume .resume-wrapper .timeline .timeline-item .timeline-right {
+    padding-left: 1.5rem;
+  }
 }
 
 .resume .resume-wrapper .timeline .timeline-item .timeline-right .position {
@@ -924,6 +1016,7 @@ section {
   position: relative;
   overflow: hidden;
   aspect-ratio: 16/10;
+  width: 100%;
 }
 
 .portfolio .portfolio-card .portfolio-image img {
@@ -1130,6 +1223,7 @@ section {
   border-radius: 50px;
   transition: all 0.3s ease;
   display: inline-flex;
+  font-size: 0.95rem;
 }
 
 .services .btn-outline-primary:hover {
@@ -1260,6 +1354,7 @@ section {
 .contact .contact-intro {
   max-width: 760px;
   margin-bottom: 2.5rem;
+  width: 100%;
 }
 
 .contact .contact-info {
@@ -1278,6 +1373,14 @@ section {
   border-radius: 10px;
   box-shadow: 0 8px 24px rgba(15, 41, 67, 0.05);
   transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  width: 100%;
+  max-width: 100%;
+}
+
+@media (max-width: 576px) {
+  .contact .contact-info .info-item {
+    padding: 1rem;
+  }
 }
 
 .contact .contact-info .info-item:hover {
@@ -1365,6 +1468,153 @@ section {
 .contact .contact-form .btn-submit:hover {
   background-color: color-mix(in srgb, var(--accent-color), transparent 15%);
   transform: translateY(-1px);
+}
+
+/* ---- Modern dotted-contact form ---- */
+
+.contact-form-wrapper {
+  margin-inline: auto;
+}
+
+.contact#contact {
+  padding: clamp(80px, 10vw, 140px) 0;
+}
+
+.contact#contact {
+  padding: clamp(80px, 10vw, 140px) 0;
+}
+
+.contact .contact-form {
+  padding: clamp(2rem, 5vw, 4rem);
+  border-radius: 16px;
+  border-radius: 16px;
+}
+
+.contact .contact-form .form-row {
+  display: flex;
+  gap: 1.25rem;
+  margin-bottom: 0;
+}
+
+.contact .contact-form .form-row-top {
+  margin-bottom: 1.5rem;
+}
+
+.contact .contact-form .form-row-middle {
+  margin-bottom: 1.5rem;
+}
+
+.contact .contact-form .form-row-bottom {
+  margin-bottom: 2rem;
+}
+
+.contact .contact-form .form-row-submit {
+  margin-bottom: 0;
+}
+
+.contact .contact-form .form-field {
+  flex: 1;
+  padding: 0.65rem 1rem;
+  border: 1px dashed rgba(15, 41, 67, 0.25);
+  border-radius: 8px;
+  background: rgba(15, 41, 67, 0.02);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+  position: relative;
+}
+
+.contact .contact-form .form-field::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 1px dashed rgba(232, 117, 50, 0.35);
+  border-radius: 8px;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+
+.contact .contact-form .form-field:hover::before,
+.contact .contact-form .form-field:focus-within::before {
+  opacity: 1;
+}
+
+.contact .contact-form .form-field:focus-within {
+  border-color: var(--accent-color);
+  background: rgba(232, 117, 50, 0.04);
+  box-shadow: 0 0 0 3px rgba(232, 117, 50, 0.08);
+}
+
+.contact .contact-form .form-field-full {
+  flex: 0 0 100%;
+}
+
+.contact .contact-form .form-field-full textarea {
+  min-height: 160px;
+}
+
+.contact .contact-form label {
+  display: block;
+  margin-bottom: 0.3rem;
+  color: var(--heading-color);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+}
+
+.contact .contact-form input,
+.contact .contact-form textarea {
+  width: 100%;
+  padding: 0.45rem 0.75rem;
+  border: none;
+  border-radius: 5px;
+  font-size: 0.88rem;
+  color: var(--default-color);
+  background: transparent;
+  outline: none;
+  transition: background 0.2s;
+  font-family: inherit;
+}
+
+.contact .contact-form input::placeholder,
+.contact .contact-form textarea::placeholder {
+  color: color-mix(in srgb, var(--default-color), transparent 40%);
+}
+
+.contact .contact-form textarea {
+  resize: vertical;
+  min-height: 140px;
+}
+
+.contact .contact-form .form-field:not(:focus-within) input:focus,
+.contact .contact-form .form-field:not(:focus-within) textarea:focus {
+  outline: none;
+}
+
+.contact .contact-form .sent-message {
+  margin-top: 0.75rem;
+  padding: 0.6rem 0.9rem;
+  background: rgba(46, 204, 113, 0.1);
+  color: #27ae60;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.contact .contact-form .error-message {
+  margin-top: 0.75rem;
+  padding: 0.6rem 0.9rem;
+  background: rgba(231, 76, 60, 0.1);
+  color: #e74c3c;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
 .footer {

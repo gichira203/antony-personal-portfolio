@@ -91,6 +91,37 @@ export const workExperience = [
       "Digital Literacy Programme support, data collection and entry, and GIS/network mapping using Google Earth Pro.",
       "Technical verification of ICT equipment to ensure functionality and reliability.",
     ],
+    image: "/images/portfolio-1.webp",
+  },
+  {
+    company: "Ajira Digital",
+    period: "Digital work and data entry assignments",
+    title: "Digital Work & Data Entry",
+    description:
+      "Digital work assignments involving structured data entry, documentation and the use of Google Workspace tools for accurate record keeping.",
+    bullets: [
+      "Data entry and record keeping using Microsoft Excel and Google Sheets.",
+      "Creation, formatting and management of spreadsheet-based data records.",
+      "Use of Google Workspace tools including Docs, Sheets and Drive for collaboration and file management.",
+      "Accurate data capture, verification and organisation of digital information.",
+      "Timely completion of assigned digital tasks within given guidelines.",
+    ],
+    image: "/images/portfolio-2.webp",
+  },
+  {
+    company: "Apex Company",
+    period: "Software development engagement",
+    title: "Software Development",
+    description:
+      "Development of software solutions starting from Figma designs and implemented with React on the frontend and Node.js on the backend.",
+    bullets: [
+      "Translating Figma UI/UX designs into responsive React frontend components.",
+      "Building interactive user interfaces with React, following modern frontend practices.",
+      "Developing backend logic and APIs using Node.js for application functionality.",
+      "Connecting frontend interfaces with backend services for full-stack operation.",
+      "Ensuring clean, maintainable code and a user-friendly final experience.",
+    ],
+    image: "/images/portfolio-4.webp",
   },
 ];
 
@@ -101,6 +132,13 @@ export const education = [
     degree: "Web Development / Full-Stack Development",
     description:
       "Hands-on learning in modern web application development, UI/UX principles, and digital solution building.",
+    bullets: [
+      "Frontend development with HTML, CSS and JavaScript fundamentals.",
+      "Modern UI/UX principles and responsive design thinking.",
+      "Building digital solutions from concept through to working interfaces.",
+      "Practical exercises in web application structure and user interaction.",
+    ],
+    image: "/images/portfolio-5.webp",
   },
   {
     school: "Technical Skills Development",
@@ -108,6 +146,13 @@ export const education = [
     degree: "Cisco Networking & Cisco Cybersecurity",
     description:
       "Focused learning in networking fundamentals, infrastructure support, and cybersecurity awareness.",
+    bullets: [
+      "Networking fundamentals and infrastructure support concepts.",
+      "Cybersecurity awareness and basic security practices.",
+      "Understanding of network configuration and troubleshooting approaches.",
+      "Structured training in technical ICT skills and documentation.",
+    ],
+    image: "/images/portfolio-7.webp",
   },
   {
     school: "Emobilis Training",
@@ -115,6 +160,13 @@ export const education = [
     degree: "Emobilis Web Development Training",
     description:
       "Practical training covering frontend, backend, and full-stack web development concepts.",
+    bullets: [
+      "Frontend and backend web development concepts and workflows.",
+      "Full-stack project structure and implementation practice.",
+      "Hands-on coding exercises in modern web technologies.",
+      "Team-based and individual project development experience.",
+    ],
+    image: "/images/portfolio-8.webp",
   },
 ];
 
@@ -329,6 +381,7 @@ export const faqItems = [
 ];
 
 export const socialLinks = [
+  { label: "LinkedIn", href: "https://linkedin.com/in/antony-muthii", icon: "linkedin" },
   { label: "GitHub", href: githubUrl, icon: "github" },
   { label: "Email", href: "mailto:antonygichira203@gmail.com", icon: "envelope" },
 ];

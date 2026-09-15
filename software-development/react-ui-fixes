@@ -1,0 +1,84 @@
+# Admin Dashboard Scaffold in Next.js
+
+## When to Use
+
+- The user asks for an admin section (e.g. `/admin`) in a portfolio Next.js app, controlled by React, with CRUD for projects, testimonials/reviews, and user messages.
+- The admin must match the portfolio's CSS colors, logo, and be mobile responsive.
+- The user names a visual reference (e.g. bootstrapmade.com AppDashboard) to borrow from.
+
+## Decision points before writing any file
+
+1. **CSS isolation from portfolio globals.** The portfolio has its own `globals.css`. Admin styles must NOT be written into that file — doing so overwrites the public site's design. Give admin its own CSS file (e.g. `src/app/admin/admin.css`) and import it only inside the admin layout subtree (the admin layout file, not the root layout). The root `layout.tsx` should have no admin CSS link.
+
+2. **Server vs client for admin pages.** Admin pages use React state (CRUD, modals, search, chat input), `useSearchParams`, `usePathname` for active link highlight, event handlers. They must each start with `"use client"` — or be wrapped in a `"use client"` layout that imports the client-side shell. A `"use client"` admin layout is the common choice: it owns the sidebar toggle, the header, `usePathname`, and passes `children` through.
+
+3. **`useSearchParams` without Suspense fails.** Any page component that calls `useSearchParams()` directly (not inside a Suspense boundary) produces a build error: the router needs a Suspense wrapper around the consuming component. Pattern: export a default page component that renders `<Suspense fallback={…}><Inner /></Suspense>`, and put `useSearchParams()` calls inside `Inner`. (Next.js 16 / React 19 — same rule as earlier Next.js versions.)
+
+4. **Data store.** No backend was specified; use an in-memory store backed by a shared TS file (e.g. `src/data/adminData.ts`) that exports the interfaces **and** seed arrays. Each page copies the seed into local state on mount for CRUD. This resets on reload — acceptable for a no-backend scope; note it to the user if persistence matters.
+
+## File shape
+
+```
+src/app/admin/layout.tsx      # client-side shell: sidebar + header + children
+src/app/admin/admin.css       # admin-only styles, imported in layout
+src/app/admin/page.tsx        # dashboard home (stats overview)
+src/app/admin/projects/page.tsx
+src/app/admin/testimonials/page.tsx
+src/app/admin/messages/page.tsx
+src/data/adminData.ts         # interfaces + seed arrays
+```
+
+- The layout is the single place that imports `admin.css`. Pages import only what they need (not the CSS).
+- The dashboard home (`/admin/page.tsx`) renders stat cards and a shortcut to the sub-pages.
+
+## CSS palette — match the portfolio
+
+Use the portfolio's CSS variables as the source of truth for colors, not hardcoded hex. The admin CSS should reference:
+
+- `--heading-color` — dark navy headings (`#0f2943`)
+- `--accent-color` — orange accent (`#e87532`)
+- `--default-color` — body text
+- `--default-font` — body font (Roboto)
+- `--heading-font` — headings font (Questrial)
+
+Logo: `public/images/logo.png`, profile: `public/images/profile-square-2.png`. Icons: bootstrap icons (`bi-*`) or lucide-react — whichever the portfolio already uses.
+
+## Auth note
+
+For a portfolio admin without a backend, no auth gate is required unless the user asks. The admin is reachable at `/admin/*` by anyone who knows the URL — that is the expected scope here.
+
+## Pitfalls
+
+1. **Writing admin CSS into `globals.css` overwrites the portfolio.** The first attempt in this project wrote 962 lines of admin CSS into `src/app/globals.css`, dropping the portfolio from 1750 lines to 648 insertions / 1437 deletions. Restore the original from git (`git show HEAD:src/app/globals.css`) and move admin CSS to its own file. **Rule: admin CSS lives in its own file, imported only inside the admin layout.**
+
+2. **`useSearchParams` without Suspense.** The projects page initially called `useSearchParams()` at the top level of the page component with no Suspense wrapper, producing a build-time error. Wrap the consuming component in `<Suspense>`.
+
+3. **Unused imports cause lint errors.** Admin pages frequently import `Link`, `Image`, or type-only imports they don't use (because the real styling is in CSS classes, not JSX). ESLint flags these. Remove imports that aren't used in the file — keep only what's rendered or typed.
+
+4. **`setState` inside `useEffect` with no dependency array.** Lint rules flag `setX(someValue)` inside `useEffect` without a dependency array as a missing-dependency hazard. For initial state derived from a constant (e.g. `adminProjects`), initialize the state directly (`useState(adminProjects)`) instead of a `useEffect` that sets it once.
+
+5. **`let` where `const` works.** The data arrays are never reassigned (you reassign via `setList`, not `list = …`). ESLint prefers `const`. Use `const` for the array variable; the setter is the mutation path.
+
+6. **`<br>` not self-closed in JSX.** JSX requires `<br />`. A bare `<br>` produces a lint/build error. Self-close all void elements in JSX.
+
+7. **Duplicate imports after manual edits.** When editing a file by hand-patching several regions, the same import line can end up duplicated (`import { useEffect, useState }` twice). Deduplicate.
+
+8. **`sed` can silently delete interface lines from a TS data file.** A `sed -i '1,2d'` on `adminData.ts` removed the first two lines — which were the `AdminProject` and `AdminTestimonial` interface declarations. The file still compiled (the interfaces were inferred from usage in some contexts) but the types were gone. **Rule: when editing a data/TS file with line-oriented tools, re-read the file afterward and confirm the interface declarations are still present.** Prefer `write_file` (full rewrite) over `sed` for TS interface files.
+
+9. **CSS patches can tear class declarations off their rule names.** When a CSS patch's `old_string` doesn't include the `.classname {` opener, the replacement can leave a rule body without its class selector — e.g. `border-radius: 8px;` floating as a bare declaration. After any CSS patch, read the affected region and confirm each rule still starts with its class selector. A torn rule silently stops applying.
+
+10. **Two CSS files with overlapping `@media` blocks for the same breakpoint fight.** See `mobile-sidebar-overlay.md` pitfall 10. Pick one CSS file as the mobile authority; do not duplicate responsive blocks across `globals.css` and `admin.css`.
+
+## Checklist
+
+- [ ] Admin CSS in its own file, imported only in admin layout (not root layout).
+- [ ] Each admin page that uses hooks/event handlers starts with `"use client"` (or is inside a client layout).
+- [ ] `useSearchParams` consumers wrapped in `<Suspense>` with a fallback.
+- [ ] No unused imports (Link, Image, types) in admin pages.
+- [ ] State initialized directly from seed arrays, not via `useEffect`.
+- [ ] `const` for data arrays, `setX` for mutations.
+- [ ] All JSX void elements self-closed (`<br />`, `<input />`, `<img />`).
+- [ ] Build passes: `npm run build`.
+- [ ] Lint passes: `npm run lint`.
+- [ ] Admin palette references portfolio CSS variables, not hardcoded hex.
+- [ ] Logo and profile image paths match the portfolio's public assets.

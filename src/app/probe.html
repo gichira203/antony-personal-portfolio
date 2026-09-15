@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Horizontal overflow probe — debug only</title>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  * {
+    box-sizing: border-box;
+    max-width: 100%;
+  }
+  img, svg, video, iframe, embed, object {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+  section, .section, header, footer, nav, main, aside, .container, .container-fluid {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+  .row {
+    margin-inline: 0;
+  }
+  .row > *, .row > [class*="col-"], .container > * {
+    min-width: 0;
+  }
+  strong, b { overflow-wrap: break-word; }
+  a { overflow-wrap: break-word; }
+  .shape-offscreen {
+    position: absolute;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .proof-item {
+    min-width: 0;
+    flex: 1 1 70px;
+  }
+  @media (max-width: 576px) {
+    .proof-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.5rem 1rem;
+    }
+    .proof-item {
+      min-width: 0;
+      flex: unset;
+    }
+  }
+  @media (max-width: 767px) {
+    .navmenu a {
+      white-space: normal;
+      overflow: visible;
+      text-overflow: clip;
+    }
+  }
+  @media (max-width: 991px) {
+    .navmenu a {
+      white-space: normal;
+      overflow: visible;
+      text-overflow: clip;
+    }
+  }
+  .admin-main {
+    min-width: 0;
+    overflow-x: hidden;
+  }
+  .admin-content {
+    min-width: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+  .admin-sidebar {
+    overflow-x: hidden;
+    min-width: 0;
+  }
+  .admin-table-wrapper {
+    overflow-x: auto;
+  }
+  .hero-image {
+    overflow: hidden;
+  }
+  .hero-image .shape-1,
+  .hero-image .shape-2 {
+    max-width: 100%;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .hero-image .shape-1 {
+    width: min(300px, 60vw);
+    height: min(300px, 60vw);
+  }
+  .hero-image .shape-2 {
+    width: min(200px, 40vw);
+    height: min(200px, 40vw);
+  }
+  .proof-item dt {
+    color: #e87532;
+    font-family: 'Questrial', sans-serif;
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 700;
+    line-height: 1;
+  }
+  .proof-item dd {
+    margin: 0.5rem 0 0;
+    color: #0f2943;
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .proof-list {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: clamp(1.5rem, 4vw, 3rem);
+    margin: 0;
+  }
+  .proof-item {
+    min-width: 120px;
+    flex: 1 1 100px;
+    text-align: center;
+  }
+  .navmenu a, .navmenu a:focus {
+    color: #0a0f14;
+    padding: 18px 15px;
+    font-size: 16px;
+    font-family: 'Noto Sans', sans-serif;
+    font-weight: 400;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    transition: color 0.3s ease, transform 0.3s ease;
+    position: relative;
+  }
+  .navmenu a::after {
+    content: '\f29d';
+    font-family: bootstrap-icons;
+    font-size: 0.7em;
+    transition: transform 0.3s ease;
+  }
+  .navmenu a:hover::after, .navmenu a:focus::after {
+    transform: translateY(3px);
+  }
+  .navmenu li.active > a {
+    color: #e87532;
+  }
+  .navmenu li.active > a::after {
+    color: #e87532;
+  }
+</style>
+</head>
+<body>
+<h1>Done.</h1>
+<p>Swap this fixture out for the probe rule that's already live in your dev server. The dev URL in the prior fixture is the one to visit.</p>
+</body>
+</html>

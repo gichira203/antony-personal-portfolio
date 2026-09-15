@@ -19,7 +19,7 @@ export function Hero() {
   const [isExiting, setIsExiting] = useState(false);
 
   const coloredCareer = typedCareer.split("").map((letter, i) => (
-    <span key={i} style={{ color: "var(--accent-color)", fontSize: "1.25em" }}>
+    <span key={i} style={{ color: "var(--accent-color)", fontSize: "1.4em" }}>
       {letter}
     </span>
   ));
@@ -64,7 +64,7 @@ export function Hero() {
             <Image
               className="hero-media-image"
               src="/images/Hero%20image.png"
-              alt="Antoh working at a computer"
+              alt="Antony working at a computer"
               fill
               preload
               sizes="(max-width: 991px) 100vw, 50vw"

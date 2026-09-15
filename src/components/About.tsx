@@ -35,18 +35,18 @@ export function About() {
                     </span>
                   </div>
                 ))}
-                <div className="personal-info-cards__card">
-                  <span className="personal-info-cards__label">LinkedIn</span>
-                  <span className="personal-info-cards__value">Antony Muthii</span>
-                </div>
-                <div className="personal-info-cards__card">
-                  <span className="personal-info-cards__label">LinkedIn Profile</span>
-                  <span className="personal-info-cards__value">
-                    <a href="#" target="_blank" rel="noopener noreferrer">
-                      Visit LinkedIn Account
-                    </a>
-                  </span>
-                </div>
+                <div className="personal-info-cards__card" key="linkedin-card">
+                    <span className="personal-info-cards__label">LinkedIn</span>
+                    <span className="personal-info-cards__value">Antony Muthii</span>
+                  </div>
+                  <div className="personal-info-cards__card" key="linkedin-profile-card">
+                    <span className="personal-info-cards__label">LinkedIn Profile</span>
+                    <span className="personal-info-cards__value">
+                      <a href="#" target="_blank" rel="noopener noreferrer">
+                        Visit LinkedIn Account
+                      </a>
+                    </span>
+                  </div>
               </div>
             </div>
           </div>
