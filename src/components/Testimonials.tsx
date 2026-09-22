@@ -13,23 +13,19 @@ interface PublicTestimonial {
 }
 
 async function fetchTestimonialsFromDb(): Promise<PublicTestimonial[]> {
-  try {
-    const res = await fetch("/api/testimonials");
-    if (!res.ok) throw new Error("fetch failed");
-    const data = await res.json() as any[];
-    if (!Array.isArray(data) || data.length === 0) throw new Error("empty");
-    return data
-      .filter((t: any) => t.published)
-      .map((t: any) => ({
-        quote: t.quote || "",
-        author: t.author || "",
-        role: t.role || "",
-        image: t.image || "/images/person-m-7.webp",
-        highlightTitle: t.highlightTitle || "",
-      }));
-  } catch {
-    return staticTestimonials as unknown as PublicTestimonial[];
-  }
+  const res = await fetch("/api/testimonials");
+  if (!res.ok) throw new Error("fetch failed");
+  const data = await res.json() as any[];
+  if (!Array.isArray(data) || data.length === 0) throw new Error("empty");
+  return data
+    .filter((t: any) => t.published)
+    .map((t: any) => ({
+      quote: t.quote || "",
+      author: t.author || "",
+      role: t.role || "",
+      image: t.image || "/images/person-m-7.webp",
+      highlightTitle: t.highlightTitle || "",
+    }));
 }
 
 function toPages(items: PublicTestimonial[]): PublicTestimonial[][] {
@@ -49,10 +45,10 @@ export function Testimonials() {
 
   useEffect(() => {
     fetchTestimonialsFromDb()
-      .then((items) => {
-        if (items.length > 0) setPages(toPages(items));
-      })
-      .catch(() => {});
+      .then((items) => setPages(toPages(items)))
+      .catch(() => {
+        /* transient failure — leave whatever is in state */
+      });
   }, []);
 
   useEffect(() => {

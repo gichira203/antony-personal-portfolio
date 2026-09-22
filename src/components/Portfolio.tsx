@@ -16,28 +16,23 @@ interface PublicProject {
 }
 
 async function fetchProjectsFromDb(): Promise<PublicProject[]> {
-  try {
-    const res = await fetch("/api/projects");
-    if (!res.ok) throw new Error("fetch failed");
-    const data = await res.json() as any[];
-    if (!Array.isArray(data) || data.length === 0) throw new Error("empty");
-    return data.map((p: any) => ({
-      title: p.title || "",
-      category: p.category || "",
-      description: p.description || "",
-      technologies: Array.isArray(p.technologies) ? p.technologies : [],
-      image:
-        Array.isArray(p.images) && p.images.length > 0
-          ? p.images[0]
-          : "/images/portfolio-1.webp",
-      filter: "filter-web",
-      github: p.github || "",
-      demo: p.demo || "#",
-    }));
-  } catch {
-    // Fall back to in-memory defaults only when DB is unreachable.
-    return staticProjects as unknown as PublicProject[];
-  }
+  const res = await fetch("/api/projects");
+  if (!res.ok) throw new Error("fetch failed");
+  const data = await res.json() as any[];
+  if (!Array.isArray(data) || data.length === 0) throw new Error("empty");
+  return data.map((p: any) => ({
+    title: p.title || "",
+    category: p.category || "",
+    description: p.description || "",
+    technologies: Array.isArray(p.technologies) ? p.technologies : [],
+    image:
+      Array.isArray(p.images) && p.images.length > 0
+        ? p.images[0]
+        : "/images/portfolio-1.webp",
+    filter: "filter-web",
+    github: p.github || "",
+    demo: p.demo || "#",
+  }));
 }
 
 const filters = [
@@ -53,10 +48,10 @@ export function Portfolio() {
 
   useEffect(() => {
     fetchProjectsFromDb()
-      .then((fetched) => {
-        if (fetched.length > 0) setProjects(fetched);
-      })
-      .catch(() => {});
+      .then(setProjects)
+      .catch(() => {
+        /* transient failure — leave whatever is in state (static or previously fetched) */
+      });
   }, []);
 
   return (

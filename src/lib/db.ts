@@ -20,6 +20,32 @@ pool.on("error", (err: Error) => {
   console.error("[db] unexpected pool error:", err);
 });
 
+// ---- One-time table setup ----
+
+async function ensureTables(): Promise<void> {
+  const client = await pool.connect();
+  try {
+    await client.query(`\n      CREATE TABLE IF NOT EXISTS \"Project\" (\n        id TEXT PRIMARY KEY,\n        title TEXT NOT NULL,\n        category TEXT NOT NULL,\n        description TEXT NOT NULL,\n        technologies TEXT[] NOT NULL DEFAULT '{}',\n        images TEXT[] NOT NULL DEFAULT '{}',\n        github TEXT NOT NULL DEFAULT '',\n        demo TEXT,\n        published BOOLEAN NOT NULL DEFAULT true\n      );\n    `);
+    await client.query(`\n      CREATE TABLE IF NOT EXISTS \"Testimonial\" (\n        id TEXT PRIMARY KEY,\n        quote TEXT NOT NULL,\n        author TEXT NOT NULL,\n        role TEXT NOT NULL DEFAULT '',\n        image TEXT NOT NULL DEFAULT '',\n        highlightTitle TEXT NOT NULL DEFAULT '',\n        published BOOLEAN NOT NULL DEFAULT true\n      );\n    `);
+    await client.query(`\n      CREATE TABLE IF NOT EXISTS \"Message\" (\n        id TEXT PRIMARY KEY,\n        name TEXT NOT NULL DEFAULT '',\n        email TEXT NOT NULL DEFAULT '',\n        phone TEXT NOT NULL DEFAULT '',\n        subject TEXT NOT NULL DEFAULT '',\n        body TEXT NOT NULL DEFAULT '',\n        \"time\" TEXT NOT NULL DEFAULT '',\n        read BOOLEAN NOT NULL DEFAULT false\n      );\n    `);
+    await client.query(`\n      CREATE TABLE IF NOT EXISTS \"AdminUser\" (\n        username TEXT PRIMARY KEY,\n        password TEXT NOT NULL,\n        display_name TEXT NOT NULL DEFAULT ''\n      );\n    `);
+    await client.query(`\n      INSERT INTO \"AdminUser\" (username, password, display_name)\n      VALUES ('antony', '12anto34', 'Antony Muthii')\n      ON CONFLICT (username) DO NOTHING;\n    `);
+    console.log("[db] tables ready");
+  } catch (err) {
+    console.error("[db] table creation failed:", err);
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
+// Run once at module load (cold start on Vercel). Failures are fatal — the API
+// routes will 500 until the DB is reachable, which is the correct behaviour.
+ensureTables().catch((err) => {
+  console.error("[db] ensureTables fatal:", err);
+  process.exit(1);
+});
+
 // ---- Helpers ----
 
 /** Map backend-style row to clean project object. */
