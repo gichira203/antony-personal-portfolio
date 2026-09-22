@@ -13,7 +13,7 @@ interface PublicTestimonial {
 
 async function fetchTestimonialsFromDb(): Promise<PublicTestimonial[]> {
   try {
-    const res = await fetch("http://localhost:3001/api/testimonials");
+    const res = await fetch("/api/testimonials");
     if (!res.ok) throw new Error("fetch failed");
     const data = await res.json() as any[];
     if (!Array.isArray(data) || data.length === 0) throw new Error("empty");

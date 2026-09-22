@@ -1,16 +1,9 @@
 // In-memory "database" — replace with real backend later
 // ------------------------------------------------------------------
-// Backend API base URL. Set BACKEND_URL env (or .env.local) to point
-// at your running backend, e.g. http://localhost:3001
-// When the backend is unreachable the functions fall back to the
-// in-memory defaults below so the admin pages still render.
+// Backend API base URL — when behind Vercel/Next.js, the API routes
+// live at the same origin, so we use a relative path.
 // ------------------------------------------------------------------
-const BACKEND_URL =
-  typeof process !== "undefined" &&
-  typeof process.env?.BACKEND_URL !== "undefined"
-    ? process.env.BACKEND_URL
-    : (typeof window !== "undefined" ? (window as any).__BACKEND_URL__ : undefined) ||
-      "http://localhost:3001";
+const BACKEND_URL = "";
 
 async function backendFetch(path: string, init?: RequestInit) {
   const url = BACKEND_URL + path;

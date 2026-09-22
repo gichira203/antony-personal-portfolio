@@ -16,7 +16,7 @@ interface PublicProject {
 
 async function fetchProjectsFromDb(): Promise<PublicProject[]> {
   try {
-    const res = await fetch("http://localhost:3001/api/projects");
+    const res = await fetch("/api/projects");
     if (!res.ok) throw new Error("fetch failed");
     const data = await res.json() as any[];
     if (!Array.isArray(data) || data.length === 0) throw new Error("empty");
