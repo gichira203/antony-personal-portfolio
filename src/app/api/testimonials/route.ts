@@ -1,10 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { requireAdmin } from "@/lib/auth";
+import type { AdminTestimonial } from "@/data/adminData";
 
-export async function GET() {
+type TestimonialBody = Partial<AdminTestimonial> & {
+  replaceAll?: boolean;
+  items?: AdminTestimonial[];
+};
+
+export async function GET(req: NextRequest) {
   try {
+    const all = req.nextUrl.searchParams.get("all") === "1";
+    if (all && !(await requireAdmin())) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    }
     const items = await db.testimonials.getAll();
-    return NextResponse.json(items);
+    const visible = all ? items : items.filter((t) => t.published);
+    return NextResponse.json(visible, {
+      headers: { "Cache-Control": "no-store" },
+    });
   } catch (err) {
     console.error("[api/testimonials] GET failed:", err);
     return NextResponse.json(
@@ -16,10 +30,13 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json().catch(() => ({})) as any;
+    if (!(await requireAdmin())) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    }
+    const body = (await req.json().catch(() => ({}))) as TestimonialBody;
 
     // Bulk replace
-    if (body?.replaceAll && Array.isArray(body.items)) {
+    if (body.replaceAll && Array.isArray(body.items)) {
       try {
         const replaced = await db.testimonials.replaceAll(body.items);
         return NextResponse.json(replaced, { status: 200 });

@@ -1,34 +1,12 @@
-// In-memory "database" — replace with real backend later
+// In-memory data for the admin panels — no database required.
 // ------------------------------------------------------------------
-// Backend API base URL — when behind Vercel/Next.js, the API routes
-// live at the same origin, so we use a relative path.
-// ------------------------------------------------------------------
-const BACKEND_URL = "";
-
-async function backendFetch(path: string, init?: RequestInit) {
-  const url = BACKEND_URL + path;
-  try {
-    const res = await fetch(url, {
-      ...init,
-      headers: { "Content-Type": "application/json", ...init?.headers },
-    });
-    if (!res.ok) {
-      const body = await res.text().catch(() => "");
-      throw new Error(`${res.status}: ${body}`);
-    }
-    return res.json();
-  } catch (err) {
-    // Backend unreachable or misconfigured — fall back to in-memory data.
-    console.warn("[adminData] backend fetch failed for", path, "-", err);
-    return null;
-  }
-}
 
 // ---- Types ----
 
 export interface AuthUser {
   username: string;
   displayName: string;
+  role: "admin" | "cashier";
 }
 
 export interface AdminProject {
@@ -64,6 +42,8 @@ export interface AdminMessage {
   read: boolean;
   isOutbound?: boolean;
 }
+
+// ---- In-memory data ----
 
 export const adminProjects: AdminProject[] = [
   {
@@ -230,74 +210,21 @@ export const adminMessages: AdminMessage[] = [
   },
 ];
 
-// ---- Backend-assisted data access ----
-// These functions hit the backend API when it is available, then
-// persist the result into localStorage so the admin pages stay fast.
-// When the backend is unreachable they fall back to the in-memory
-// defaults above so the admin pages still render.
-
-export async function fetchProjects(): Promise<AdminProject[]> {
-  const data = await backendFetch("/api/projects");
-  if (Array.isArray(data)) return data as AdminProject[];
-  return adminProjects;
-}
-
-export async function saveProjects(data: AdminProject[]): Promise<void> {
-  await backendFetch("/api/projects", {
-    method: "POST",
-    body: JSON.stringify({ replaceAll: true, items: data }),
-  }).catch(() => { /* backend unavailable — data stays in localStorage */ });
-}
-
-export async function fetchTestimonials(): Promise<AdminTestimonial[]> {
-  const data = await backendFetch("/api/testimonials");
-  if (Array.isArray(data)) return data as AdminTestimonial[];
-  return adminTestimonials;
-}
-
-export async function saveTestimonials(data: AdminTestimonial[]): Promise<void> {
-  await backendFetch("/api/testimonials", {
-    method: "POST",
-    body: JSON.stringify({ replaceAll: true, items: data }),
-  }).catch(() => {});
-}
-
-export async function fetchMessages(): Promise<AdminMessage[]> {
-  const data = await backendFetch("/api/messages");
-  if (Array.isArray(data)) return data as AdminMessage[];
-  return adminMessages;
-}
-
-export async function saveMessages(data: AdminMessage[]): Promise<void> {
-  await backendFetch("/api/messages", {
-    method: "POST",
-    body: JSON.stringify({ replaceAll: true, items: data }),
-  }).catch(() => {});
-}
+// ---- Auth ----
 
 export async function login(
   username: string,
-  password: string
+  _password: string
 ): Promise<AuthUser | null> {
-  // Hardcoded fallback so the admin panel works even when the backend is down.
-  if (username === "antony" && password === "12anto34") {
-    return { username: "antony", displayName: "Antony Muthii" };
-  }
-  try {
-    const data = await backendFetch("/api/auth/login", {
-      method: "POST",
-      body: JSON.stringify({ username, password }),
-    });
-    if (data && typeof data === "object" && "token" in data) {
-      return {
-        username: String(data.username ?? username),
-        displayName: String(data.displayName ?? username),
-      };
-    }
-  } catch {
-    /* backend unreachable — fallback already handled above */
-  }
-  return null;
+  // Any password accepted — role is derived from the username.
+  // Usernames containing "cashier" (case-insensitive) go to the cashier dashboard.
+  const lower = username.trim().toLowerCase();
+  const role: "admin" | "cashier" = lower.includes("cashier") ? "cashier" : "admin";
+  return {
+    username: username.trim(),
+    displayName: username.trim(),
+    role,
+  };
 }
 
 export function isAuthenticated(): AuthUser | null {
@@ -306,7 +233,12 @@ export function isAuthenticated(): AuthUser | null {
     const raw = sessionStorage.getItem("admin_auth");
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (parsed && typeof parsed === "object" && typeof parsed.username === "string") {
+      if (
+        parsed &&
+        typeof parsed === "object" &&
+        typeof parsed.username === "string" &&
+        typeof parsed.role === "string"
+      ) {
         return parsed as AuthUser;
       }
     }

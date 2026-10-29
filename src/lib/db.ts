@@ -1,5 +1,6 @@
 import pg from "pg";
 import { randomUUID } from "crypto";
+import { hashPassword } from "./password";
 
 const { Pool } = pg;
 
@@ -28,8 +29,26 @@ async function ensureTables(): Promise<void> {
     await client.query(`\n      CREATE TABLE IF NOT EXISTS \"Project\" (\n        id TEXT PRIMARY KEY,\n        title TEXT NOT NULL,\n        category TEXT NOT NULL,\n        description TEXT NOT NULL,\n        technologies TEXT[] NOT NULL DEFAULT '{}',\n        images TEXT[] NOT NULL DEFAULT '{}',\n        github TEXT NOT NULL DEFAULT '',\n        demo TEXT,\n        published BOOLEAN NOT NULL DEFAULT true\n      );\n    `);
     await client.query(`\n      CREATE TABLE IF NOT EXISTS \"Testimonial\" (\n        id TEXT PRIMARY KEY,\n        quote TEXT NOT NULL,\n        author TEXT NOT NULL,\n        role TEXT NOT NULL DEFAULT '',\n        image TEXT NOT NULL DEFAULT '',\n        highlightTitle TEXT NOT NULL DEFAULT '',\n        published BOOLEAN NOT NULL DEFAULT true\n      );\n    `);
     await client.query(`\n      CREATE TABLE IF NOT EXISTS \"Message\" (\n        id TEXT PRIMARY KEY,\n        name TEXT NOT NULL DEFAULT '',\n        email TEXT NOT NULL DEFAULT '',\n        phone TEXT NOT NULL DEFAULT '',\n        subject TEXT NOT NULL DEFAULT '',\n        body TEXT NOT NULL DEFAULT '',\n        \"time\" TEXT NOT NULL DEFAULT '',\n        read BOOLEAN NOT NULL DEFAULT false\n      );\n    `);
+    await client.query(`ALTER TABLE "Message" ADD COLUMN IF NOT EXISTS "isOutbound" BOOLEAN NOT NULL DEFAULT false`);
+    await client.query(`ALTER TABLE "Message" ADD COLUMN IF NOT EXISTS "parentId" TEXT`);
     await client.query(`\n      CREATE TABLE IF NOT EXISTS \"AdminUser\" (\n        username TEXT PRIMARY KEY,\n        password TEXT NOT NULL,\n        display_name TEXT NOT NULL DEFAULT ''\n      );\n    `);
+    await client.query(`ALTER TABLE "AdminUser" ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'admin'`);
     await client.query(`\n      INSERT INTO \"AdminUser\" (username, password, display_name)\n      VALUES ('antony', '12anto34', 'Antony Muthii')\n      ON CONFLICT (username) DO NOTHING;\n    `);
+    {
+      const seed = await client.query(
+        'SELECT password FROM "AdminUser" WHERE username = $1',
+        ["antony"]
+      );
+      const stored: string | undefined = seed.rows[0]?.password;
+      if (stored && !stored.startsWith("scrypt$")) {
+        await client.query('UPDATE "AdminUser" SET password = $1 WHERE username = $2', [
+          hashPassword(stored),
+          "antony",
+        ]);
+      }
+    }
+    await client.query(`\n      CREATE TABLE IF NOT EXISTS "SiteContent" (\n        key TEXT PRIMARY KEY,\n        value JSONB NOT NULL,\n        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()\n      );\n    `);
+    await client.query(`\n      CREATE TABLE IF NOT EXISTS "Image" (\n        id TEXT PRIMARY KEY,\n        mime TEXT NOT NULL,\n        data BYTEA NOT NULL,\n        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()\n      );\n    `);
     console.log("[db] tables ready");
   } catch (err) {
     console.error("[db] table creation failed:", err);
@@ -87,7 +106,8 @@ function normalizeMessage(row: any) {
     body: row.body || "",
     time: row.time || "",
     read: !!row.read,
-    isOutbound: row.isOutbound || false,
+    isOutbound: !!row.isOutbound,
+    parentId: row.parentId || null,
   };
 }
 
@@ -394,12 +414,12 @@ export const testimonials = {
 export const messages = {
   getAll: () =>
     pool
-      .query('SELECT id, name, email, phone, subject, body, "time", read FROM "Message" ORDER BY id ASC')
+      .query('SELECT id, name, email, phone, subject, body, "time", read, "isOutbound", "parentId" FROM "Message" ORDER BY "time" ASC')
       .then((r) => r.rows.map(normalizeMessage)),
 
   getById: (id: string) =>
     pool
-      .query('SELECT id, name, email, phone, subject, body, "time", read FROM "Message" WHERE id = $1', [
+      .query('SELECT id, name, email, phone, subject, body, "time", read, "isOutbound", "parentId" FROM "Message" WHERE id = $1', [
         id,
       ])
       .then((r) => (r.rows[0] ? normalizeMessage(r.rows[0]) : null)),
@@ -407,8 +427,8 @@ export const messages = {
   add: (item: any) =>
     pool
       .query(
-        `INSERT INTO "Message" (id, name, email, phone, subject, body, "time", read)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        `INSERT INTO "Message" (id, name, email, phone, subject, body, "time", read, "isOutbound", "parentId")
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
          RETURNING id`,
         [
           randomUUID(),
@@ -419,6 +439,8 @@ export const messages = {
           item.body || "",
           item.time || "",
           !!item.read,
+          !!item.isOutbound,
+          item.parentId || null,
         ]
       )
       .then((r) => ({
@@ -430,13 +452,14 @@ export const messages = {
         body: item.body || "",
         time: item.time || "",
         read: !!item.read,
-        isOutbound: item.isOutbound || false,
+        isOutbound: !!item.isOutbound,
+        parentId: item.parentId || null,
       })),
 
   update: (id: string, patch: any) =>
     pool
       .query(
-        'SELECT id, name, email, phone, subject, body, "time", read FROM "Message" WHERE id = $1',
+        'SELECT id, name, email, phone, subject, body, "time", read, "isOutbound", "parentId" FROM "Message" WHERE id = $1',
         [id]
       )
       .then((existing) => {
@@ -445,8 +468,9 @@ export const messages = {
         return pool.query(
           `UPDATE "Message" SET
              name = $1, email = $2, phone = $3, subject = $4,
-             body = $5, "time" = $6, read = $7
-           WHERE id = $8`,
+             body = $5, "time" = $6, read = $7,
+             "isOutbound" = $8, "parentId" = $9
+           WHERE id = $10`,
           [
             patch.name !== undefined ? patch.name : row.name,
             patch.email !== undefined ? patch.email : row.email,
@@ -455,6 +479,8 @@ export const messages = {
             patch.body !== undefined ? patch.body : row.body,
             patch.time !== undefined ? patch.time : row.time,
             patch.read !== undefined ? patch.read : row.read,
+            patch.isOutbound !== undefined ? !!patch.isOutbound : row.isOutbound,
+            patch.parentId !== undefined ? patch.parentId : row.parentId,
             id,
           ]
         ).then(() => ({
@@ -466,6 +492,10 @@ export const messages = {
           body: patch.body !== undefined ? patch.body : row.body,
           time: patch.time !== undefined ? patch.time : row.time,
           read: patch.read !== undefined ? patch.read : row.read,
+          isOutbound:
+            patch.isOutbound !== undefined ? !!patch.isOutbound : row.isOutbound,
+          parentId:
+            patch.parentId !== undefined ? patch.parentId : row.parentId,
         }));
       }),
 
@@ -476,7 +506,7 @@ export const messages = {
 
   unreadCount: () =>
     pool
-      .query('SELECT COUNT(*)::int FROM "Message" WHERE read = false')
+      .query('SELECT COUNT(*)::int FROM "Message" WHERE read = false AND "isOutbound" = false')
       .then((r) => r.rows[0].count),
 
   replaceAll: (items: any[]) =>
@@ -494,8 +524,8 @@ export const messages = {
       return pool.query("SELECT 1");
     }).then(() => {
       const sql = `
-        INSERT INTO "Message" (id, name, email, phone, subject, body, "time", read)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        INSERT INTO "Message" (id, name, email, phone, subject, body, "time", read, "isOutbound", "parentId")
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
         ON CONFLICT (id) DO UPDATE SET
           name = EXCLUDED.name,
           email = EXCLUDED.email,
@@ -503,7 +533,9 @@ export const messages = {
           subject = EXCLUDED.subject,
           body = EXCLUDED.body,
           "time" = EXCLUDED."time",
-          read = EXCLUDED.read
+          read = EXCLUDED.read,
+          "isOutbound" = EXCLUDED."isOutbound",
+          "parentId" = EXCLUDED."parentId"
       `;
       const promises: Promise<any>[] = [];
       for (const it of items) {
@@ -518,11 +550,13 @@ export const messages = {
               it.body || "",
               it.time || "",
               !!it.read,
+              !!it.isOutbound,
+              it.parentId || null,
             ])
             .then(() =>
               pool
                 .query(
-                  'SELECT id, name, email, phone, subject, body, "time", read FROM "Message" WHERE id = $1',
+                  'SELECT id, name, email, phone, subject, body, "time", read, "isOutbound", "parentId" FROM "Message" WHERE id = $1',
                   [it.id]
                 )
                 .then((r) => (r.rows[0] ? normalizeMessage(r.rows[0]) : null))
@@ -533,15 +567,83 @@ export const messages = {
     }),
 };
 
+// ---- Uploaded images (stored in Postgres so they survive deploys) ----
+
+export const images = {
+  add: (data: Buffer, mime: string) =>
+    pool
+      .query('INSERT INTO "Image" (id, mime, data) VALUES ($1, $2, $3) RETURNING id', [
+        randomUUID(),
+        mime,
+        data,
+      ])
+      .then((r) => ({ id: r.rows[0].id as string })),
+
+  getById: (id: string) =>
+    pool
+      .query('SELECT mime, data FROM "Image" WHERE id = $1', [id])
+      .then((r) =>
+        r.rows[0]
+          ? { mime: r.rows[0].mime as string, data: r.rows[0].data as Buffer }
+          : null
+      ),
+
+  delete: (id: string) =>
+    pool
+      .query('DELETE FROM "Image" WHERE id = $1', [id])
+      .then((r) => (r.rowCount ?? 0) > 0),
+};
+
 // ---- Users (admin auth) ----
 
 export const users = {
   getByUsername: (username: string) =>
     pool
-      .query('SELECT username, password, display_name FROM "AdminUser" WHERE username = $1', [
+      .query(
+        'SELECT username, password, display_name, role FROM "AdminUser" WHERE username = $1',
+        [username]
+      )
+      .then((r) =>
+        r.rows[0]
+          ? {
+              username: r.rows[0].username as string,
+              password: r.rows[0].password as string,
+              display_name: (r.rows[0].display_name as string) || "",
+              role: (r.rows[0].role as string) === "cashier" ? "cashier" : "admin",
+            }
+          : null
+      ),
+
+  updatePassword: (username: string, passwordHash: string) =>
+    pool
+      .query('UPDATE "AdminUser" SET password = $1 WHERE username = $2', [
+        passwordHash,
         username,
       ])
-      .then((r) => (r.rows[0] ? (r.rows[0] as any) : null)),
+      .then((r) => (r.rowCount ?? 0) > 0),
+};
+
+// ---- Editable site content (one JSONB document per section) ----
+
+export const content = {
+  getAll: () =>
+    pool
+      .query('SELECT key, value FROM "SiteContent"')
+      .then((r) => {
+        const result: Record<string, unknown> = {};
+        for (const row of r.rows) result[row.key] = row.value;
+        return result;
+      }),
+
+  set: (key: string, value: unknown) =>
+    pool
+      .query(
+        `INSERT INTO "SiteContent" (key, value, updated_at)
+         VALUES ($1, $2::jsonb, NOW())
+         ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()`,
+        [key, JSON.stringify(value)]
+      )
+      .then(() => value),
 };
 
 // ---- Explicit db object (mirrors backend's shape) ----
@@ -551,4 +653,6 @@ export const db = {
   testimonials,
   messages,
   users,
+  images,
+  content,
 };

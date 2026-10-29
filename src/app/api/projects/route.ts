@@ -1,10 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { requireAdmin } from "@/lib/auth";
+import type { AdminProject } from "@/data/adminData";
 
-export async function GET() {
+type ProjectBody = Partial<Omit<AdminProject, "technologies">> & {
+  technologies?: string[] | string;
+  replaceAll?: boolean;
+  items?: AdminProject[];
+};
+
+export async function GET(req: NextRequest) {
   try {
+    // Public site gets published projects only. The admin passes ?all=1.
+    const all = req.nextUrl.searchParams.get("all") === "1";
+    if (all && !(await requireAdmin())) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    }
     const items = await db.projects.getAll();
-    return NextResponse.json(items);
+    const visible = all ? items : items.filter((p) => p.published);
+    return NextResponse.json(visible, {
+      headers: { "Cache-Control": "no-store" },
+    });
   } catch (err) {
     console.error("[api/projects] GET failed:", err);
     return NextResponse.json(
@@ -16,10 +32,13 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json().catch(() => ({})) as any;
+    if (!(await requireAdmin())) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    }
+    const body = (await req.json().catch(() => ({}))) as ProjectBody;
 
     // Bulk replace
-    if (body?.replaceAll && Array.isArray(body.items)) {
+    if (body.replaceAll && Array.isArray(body.items)) {
       try {
         const replaced = await db.projects.replaceAll(body.items);
         return NextResponse.json(replaced, { status: 200 });

@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { login, type AuthUser } from "@/data/adminData";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -17,16 +16,28 @@ export default function LoginPage() {
     setError("");
     setLoading(true);
     try {
-      const user = await login(username.trim(), password);
-      if (user) {
-        if (typeof window !== "undefined") {
-          sessionStorage.setItem("admin_auth", JSON.stringify(user));
-        }
-        router.push("/admin");
-        router.refresh();
-      } else {
-        setError("Invalid username or password");
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: username.trim(),
+          password,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = (await res.json().catch(() => ({}))) as { error?: string };
+        setError(data.error || "Invalid username or password");
+        return;
       }
+
+      const data = (await res.json()) as {
+        user?: { role?: "admin" | "cashier" };
+      };
+      router.replace(
+        data.user?.role === "cashier" ? "/admin/cashier" : "/admin"
+      );
+      router.refresh();
     } catch {
       setError("Network error. Please try again.");
     } finally {

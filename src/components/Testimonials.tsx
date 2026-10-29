@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import { testimonials as staticTestimonials } from "@/data/siteContent";
 
@@ -12,20 +12,26 @@ interface PublicTestimonial {
   highlightTitle: string;
 }
 
+interface TestimonialApiRow {
+  quote?: string;
+  author?: string;
+  role?: string;
+  image?: string;
+  highlightTitle?: string;
+}
+
 async function fetchTestimonialsFromDb(): Promise<PublicTestimonial[]> {
-  const res = await fetch("/api/testimonials");
+  const res = await fetch("/api/testimonials", { cache: "no-store" });
   if (!res.ok) throw new Error("fetch failed");
-  const data = await res.json() as any[];
-  if (!Array.isArray(data) || data.length === 0) throw new Error("empty");
-  return data
-    .filter((t: any) => t.published)
-    .map((t: any) => ({
-      quote: t.quote || "",
-      author: t.author || "",
-      role: t.role || "",
-      image: t.image || "/images/person-m-7.webp",
-      highlightTitle: t.highlightTitle || "",
-    }));
+  const data = (await res.json()) as TestimonialApiRow[];
+  if (!Array.isArray(data)) throw new Error("invalid response");
+  return data.map((t) => ({
+    quote: t.quote || "",
+    author: t.author || "",
+    role: t.role || "",
+    image: t.image || "/images/person-m-7.webp",
+    highlightTitle: t.highlightTitle || "",
+  }));
 }
 
 function toPages(items: PublicTestimonial[]): PublicTestimonial[][] {
@@ -43,13 +49,49 @@ export function Testimonials() {
     toPages(staticTestimonials as unknown as PublicTestimonial[])
   );
 
-  useEffect(() => {
-    fetchTestimonialsFromDb()
-      .then((items) => setPages(toPages(items)))
-      .catch(() => {
-        /* transient failure — leave whatever is in state */
-      });
+  const load = useCallback(async () => {
+    try {
+      const items = await fetchTestimonialsFromDb();
+      setPages(toPages(items));
+      setActiveIndex(0);
+    } catch {
+      /* transient failure — keep whatever is currently shown */
+    }
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    const refresh = () => {
+      if (!cancelled) void load();
+    };
+
+    refresh();
+
+    const interval = window.setInterval(refresh, 8000);
+    const onFocus = () => refresh();
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") refresh();
+    };
+
+    let channel: BroadcastChannel | null = null;
+    try {
+      channel = new BroadcastChannel("portfolio-updates");
+      channel.onmessage = () => refresh();
+    } catch {
+      /* polling still keeps this section up to date */
+    }
+
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisibility);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisibility);
+      channel?.close();
+    };
+  }, [load]);
 
   useEffect(() => {
     if (pages.length === 0) return;
@@ -71,10 +113,7 @@ export function Testimonials() {
       <div className="container section-title" data-aos="fade-up">
         <h2>Testimonials</h2>
         <div className="title-shape" aria-hidden="true">
-          <svg
-            viewBox="0 0 200 20"
-            xmlns="http://www.w3.org/2000/svg"
-          >
+          <svg viewBox="0 0 200 20" xmlns="http://www.w3.org/2000/svg">
             <path
               d="M 0,10 C 40,0 60,20 100,10 C 140,0 160,20 200,10"
               fill="none"
