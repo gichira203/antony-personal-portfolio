@@ -40,7 +40,11 @@ export function Navbar() {
         <div className="header-social-links">
           {socialLinks.slice(0, 4).map((link) => (
             <a key={link.label} href={link.href} aria-label={link.label} target={link.href.startsWith("http") ? "_blank" : undefined} rel={link.href.startsWith("http") ? "noopener noreferrer" : undefined}>
-              <span className={`bi bi-${link.icon}`} aria-hidden="true" />
+              <span
+                className={`bi bi-${link.icon}`}
+                aria-hidden="true"
+                style={link.label === "WhatsApp" ? { color: "#25D366" } : undefined}
+              />
             </a>
           ))}
         </div>

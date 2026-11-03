@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
     const session = {
       username: user.username,
       displayName: user.display_name || user.username,
-      role: user.role,
+      role: user.role as "admin" | "cashier",
     };
     const token = createSessionToken(session);
 

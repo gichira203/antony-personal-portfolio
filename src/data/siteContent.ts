@@ -384,6 +384,7 @@ export const socialLinks = [
   { label: "LinkedIn", href: "https://linkedin.com/in/antony-muthii", icon: "linkedin" },
   { label: "GitHub", href: githubUrl, icon: "github" },
   { label: "Email", href: "mailto:antonygichira203@gmail.com", icon: "envelope" },
+  { label: "WhatsApp", href: "https://wa.me/254726815333", icon: "whatsapp" },
 ];
 
 export const contactDetails = {

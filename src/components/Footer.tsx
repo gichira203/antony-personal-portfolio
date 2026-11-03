@@ -52,7 +52,11 @@ export function Footer() {
           <div className="social-links d-flex justify-content-center">
             {socialLinks.map((link) => (
               <a key={link.label} href={link.href} aria-label={link.label} target={link.href.startsWith("http") ? "_blank" : undefined} rel={link.href.startsWith("http") ? "noopener noreferrer" : undefined}>
-                <i className={`bi bi-${link.icon}`} aria-hidden="true" />
+                <i
+                  className={`bi bi-${link.icon}`}
+                  aria-hidden="true"
+                  style={link.label === "WhatsApp" ? { color: "#25D366" } : undefined}
+                />
               </a>
             ))}
           </div>
